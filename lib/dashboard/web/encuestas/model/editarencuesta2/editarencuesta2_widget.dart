@@ -1,0 +1,494 @@
+import '/auth/firebase_auth/auth_util.dart';
+import '/backend/backend.dart';
+import '/components/successpopup_widget.dart';
+import '/components/text_field_alerta_widget.dart';
+import '/dashboard/web/encuestas/crearencuesta/pregunta_card_widget.dart';
+import '/dashboard/web/encuestas/model/emptytest/emptytest_widget.dart';
+import '/flutter_flow/flutter_flow_drop_down.dart';
+import '/flutter_flow/flutter_flow_theme.dart';
+import '/flutter_flow/flutter_flow_util.dart';
+import '/flutter_flow/flutter_flow_widgets.dart';
+import '/flutter_flow/form_field_controller.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:webviewx_plus/webviewx_plus.dart';
+import 'editarencuesta2_model.dart';
+import '../../encuesta_form_helpers.dart';
+import '../../editar/widgets/tamizajes_niveles.dart';
+export 'editarencuesta2_model.dart';
+
+part 'editarencuesta2_widget.form_sections.dart';
+part 'editarencuesta2_widget.action_sections.dart';
+
+class Editarencuesta2Widget extends StatefulWidget {
+  const Editarencuesta2Widget({
+    super.key,
+    required this.encuestaID,
+    required this.docencuestas2,
+    required this.tipo,
+  });
+
+  final DocumentReference? encuestaID;
+  final EncuestasRecord? docencuestas2;
+  final String? tipo;
+
+  @override
+  State<Editarencuesta2Widget> createState() => _Editarencuesta2WidgetState();
+}
+
+class _Editarencuesta2WidgetState extends State<Editarencuesta2Widget> {
+  late Editarencuesta2Model _model;
+
+  @override
+  void setState(VoidCallback callback) {
+    super.setState(callback);
+    _model.onUpdate();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _model = createModel(context, () => Editarencuesta2Model());
+
+    // On component load action.
+    SchedulerBinding.instance.addPostFrameCallback((_) async {
+      safeSetState(() {
+        _model.textController1?.text = widget.docencuestas2!.titulo;
+      });
+      safeSetState(() {
+        _model.descTextController?.text = widget.docencuestas2!.descripcion;
+      });
+      safeSetState(() {
+        _model.roleValueController?.value = widget.docencuestas2!.roles;
+        _model.roleValue = List.from(widget.docencuestas2!.roles);
+      });
+      safeSetState(() {
+        _model.categoriaValue = widget.docencuestas2!.categoria;
+        _model.categoriaValueController ??=
+            FormFieldController<String>(_model.categoriaValue);
+      });
+      if (widget.docencuestas2!.alertas.length > 2) {
+        FFAppState().listaAlertasEnvio =
+            widget.docencuestas2!.alertas.toList().cast<AlertaStruct>();
+        safeSetState(() {});
+      } else {
+        FFAppState().listaAlertasEnvio =
+            FFAppState().listaAlertas.toList().cast<AlertaStruct>();
+        safeSetState(() {});
+      }
+    });
+
+    _model.textController1 ??= TextEditingController();
+    _model.textFieldFocusNode ??= FocusNode();
+
+    _model.descTextController ??= TextEditingController();
+    _model.descFocusNode ??= FocusNode();
+
+    _model.preguntaTextController ??= TextEditingController();
+    _model.preguntaFocusNode ??= FocusNode();
+
+    _model.abiertaTextController ??= TextEditingController();
+    _model.abiertaFocusNode ??= FocusNode();
+
+    _model.selection1TextController1 ??= TextEditingController();
+    _model.selection1FocusNode1 ??= FocusNode();
+
+    _model.selectionPuntajeTextController ??= TextEditingController();
+    _model.selectionPuntajeFocusNode ??= FocusNode();
+
+    _model.selection1TextController2 ??= TextEditingController();
+    _model.selection1FocusNode2 ??= FocusNode();
+
+    _model.selectionunica1TextController ??= TextEditingController();
+    _model.selectionunica1FocusNode ??= FocusNode();
+
+    _model.selection1CondicionTextController ??= TextEditingController();
+    _model.selection1CondicionFocusNode ??= FocusNode();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _model.maybeDispose();
+
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    context.watch<FFAppState>();
+
+    return Container(
+      decoration: BoxDecoration(
+        color: FlutterFlowTheme.of(context).secondaryBackground,
+      ),
+      child: SingleChildScrollView(
+        primary: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Flexible(
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Flexible(
+                    child: Container(
+                      height: MediaQuery.sizeOf(context).height * 1.0,
+                      decoration: BoxDecoration(),
+                      child: Padding(
+                        padding: EdgeInsetsDirectional.fromSTEB(
+                            40.0, 20.0, 40.0, 20.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.max,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            _buildHeaderRow(context),
+                            Flexible(
+                              child: Padding(
+                                padding: EdgeInsetsDirectional.fromSTEB(
+                                    0.0, 45.0, 0.0, 0.0),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Flexible(
+                                      child: Container(
+                                        height:
+                                            MediaQuery.sizeOf(context).height *
+                                                1.0,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              blurRadius: 50.0,
+                                              color: Color(0x26000000),
+                                              offset: Offset(
+                                                20.0,
+                                                20.0,
+                                              ),
+                                            )
+                                          ],
+                                          borderRadius:
+                                              BorderRadius.circular(20.0),
+                                        ),
+                                        child: Padding(
+                                          padding: EdgeInsets.all(10.0),
+                                          child: SingleChildScrollView(
+                                            primary: false,
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                _buildDatosPrincipalesSection(context),
+                                                _buildAgregarPreguntasButton(context),
+                                                Padding(
+                                                  padding: EdgeInsets.all(20.0),
+                                                  child: StreamBuilder<
+                                                      EncuestasRecord>(
+                                                    stream: EncuestasRecord
+                                                        .getDocument(widget
+                                                            .encuestaID!),
+                                                    builder:
+                                                        (context, snapshot) {
+                                                      // Customize what your widget looks like when it's loading.
+                                                      if (!snapshot.hasData) {
+                                                        return Center(
+                                                          child: SizedBox(
+                                                            width: 50.0,
+                                                            height: 50.0,
+                                                            child:
+                                                                CircularProgressIndicator(
+                                                              valueColor:
+                                                                  AlwaysStoppedAnimation<
+                                                                      Color>(
+                                                                FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .primary,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        );
+                                                      }
+
+                                                      final containerEncuestasRecord =
+                                                          snapshot.data!;
+
+                                                      return Container(
+                                                        width:
+                                                            MediaQuery.sizeOf(
+                                                                        context)
+                                                                    .width *
+                                                                1.0,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      20.0),
+                                                        ),
+                                                        child:
+                                                            SingleChildScrollView(
+                                                          primary: false,
+                                                          child: Column(
+                                                            mainAxisSize:
+                                                                MainAxisSize
+                                                                    .max,
+                                                            children: [
+                                                              _buildPreguntasList(containerEncuestasRecord),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      );
+                                                    },
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    SingleChildScrollView(
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.max,
+                                        children: [
+                                          Padding(
+                                            padding:
+                                                EdgeInsetsDirectional.fromSTEB(
+                                                    30.0, 0.0, 0.0, 0.0),
+                                            child: Container(
+                                              width: MediaQuery.sizeOf(context)
+                                                      .width *
+                                                  0.2,
+                                              decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    blurRadius: 50.0,
+                                                    color: Color(0x26000000),
+                                                    offset: Offset(
+                                                      20.0,
+                                                      20.0,
+                                                    ),
+                                                  )
+                                                ],
+                                                borderRadius:
+                                                    BorderRadius.circular(20.0),
+                                              ),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Flexible(
+                                                    child: Padding(
+                                                      padding:
+                                                          EdgeInsets.all(20.0),
+                                                      child: Column(
+                                                        mainAxisSize:
+                                                            MainAxisSize.min,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .center,
+                                                        children: [
+                                                          Column(
+                                                            mainAxisSize:
+                                                                MainAxisSize
+                                                                    .max,
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                              Row(
+                                                                mainAxisSize:
+                                                                    MainAxisSize
+                                                                        .max,
+                                                                children: [
+                                                                  Padding(
+                                                                    padding: EdgeInsetsDirectional
+                                                                        .fromSTEB(
+                                                                            0.0,
+                                                                            12.0,
+                                                                            0.0,
+                                                                            15.0),
+                                                                    child: Text(
+                                                                      'Dirigido a:',
+                                                                      style: FlutterFlowTheme.of(
+                                                                              context)
+                                                                          .bodyMedium
+                                                                          .override(
+                                                                            font:
+                                                                                GoogleFonts.inter(
+                                                                              fontWeight: FontWeight.w600,
+                                                                              fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                                                                            ),
+                                                                            fontSize:
+                                                                                18.0,
+                                                                            letterSpacing:
+                                                                                0.0,
+                                                                            fontWeight:
+                                                                                FontWeight.w600,
+                                                                            fontStyle:
+                                                                                FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                                                                          ),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                              FlutterFlowDropDown<
+                                                                  String>(
+                                                                multiSelectController: _model
+                                                                        .roleValueController ??=
+                                                                    FormListFieldController<
+                                                                        String>(_model
+                                                                            .roleValue ??=
+                                                                        List<
+                                                                            String>.from(
+                                                                  widget.docencuestas2
+                                                                          ?.roles ??
+                                                                      [],
+                                                                )),
+                                                                options:
+                                                                    FFAppConstants
+                                                                        .Role,
+                                                                width: 276.0,
+                                                                height: 56.0,
+                                                                textStyle: FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .bodyMedium
+                                                                    .override(
+                                                                      font: GoogleFonts
+                                                                          .inter(
+                                                                        fontWeight:
+                                                                            FontWeight.w500,
+                                                                        fontStyle: FlutterFlowTheme.of(context)
+                                                                            .bodyMedium
+                                                                            .fontStyle,
+                                                                      ),
+                                                                      color: Color(
+                                                                          0xFF9E8888),
+                                                                      letterSpacing:
+                                                                          0.0,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w500,
+                                                                      fontStyle: FlutterFlowTheme.of(
+                                                                              context)
+                                                                          .bodyMedium
+                                                                          .fontStyle,
+                                                                    ),
+                                                                hintText:
+                                                                    'Seleccionar',
+                                                                icon: Icon(
+                                                                  Icons
+                                                                      .keyboard_arrow_down_rounded,
+                                                                  color: Color(
+                                                                      0xFF265294),
+                                                                  size: 35.0,
+                                                                ),
+                                                                fillColor: Color(
+                                                                    0xFFF5F5F5),
+                                                                elevation: 2.0,
+                                                                borderColor:
+                                                                    FlutterFlowTheme.of(
+                                                                            context)
+                                                                        .alternate,
+                                                                borderWidth:
+                                                                    2.0,
+                                                                borderRadius:
+                                                                    8.0,
+                                                                margin: EdgeInsetsDirectional
+                                                                    .fromSTEB(
+                                                                        16.0,
+                                                                        4.0,
+                                                                        16.0,
+                                                                        4.0),
+                                                                hidesUnderline:
+                                                                    true,
+                                                                isOverButton:
+                                                                    false,
+                                                                isSearchable:
+                                                                    false,
+                                                                isMultiSelect:
+                                                                    true,
+                                                                onMultiSelectChanged:
+                                                                    (val) async {
+                                                                  safeSetState(() =>
+                                                                      _model.roleValue =
+                                                                          val);
+                                                                  await widget
+                                                                      .encuestaID!
+                                                                      .update({
+                                                                    ...mapToFirestore(
+                                                                      {
+                                                                        'Roles':
+                                                                            _model.roleValue,
+                                                                      },
+                                                                    ),
+                                                                  });
+                                                                },
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          ..._buildActionButtons(context),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          if (widget.tipo == 'Tamizajes')
+                                            _buildTamizajesAlertsPanel(context),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPreguntasList(EncuestasRecord encuestasRecord) {
+    final preguntaList = encuestasRecord.preguntas.toList();
+    if (preguntaList.isEmpty) {
+      return Center(child: EmptytestWidget());
+    }
+    return ListView.builder(
+      padding: EdgeInsets.zero,
+      primary: false,
+      shrinkWrap: true,
+      itemCount: preguntaList.length,
+      itemBuilder: (context, index) {
+        return PreguntaCard(
+          pregunta: preguntaList[index],
+          encuestasRecord: encuestasRecord,
+          index: index,
+        );
+      },
+    );
+  }
+}

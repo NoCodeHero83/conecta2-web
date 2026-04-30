@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "1091232026535",
+    "project_id": "conecta2-d3033",
+    "storage_bucket": "conecta2-d3033.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1091232026535:android:0c78f837122fe5250ab082",
+        "android_client_info": {
+          "package_name": "com.mycompany.conecta2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBSh-10eTToHjBMZvaRy0eI9Od7h-jdNXQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1091232026535:android:94a2e43c84c71ffb0ab082",
+        "android_client_info": {
+          "package_name": "com.ninosdepapel.conecta2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBSh-10eTToHjBMZvaRy0eI9Od7h-jdNXQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

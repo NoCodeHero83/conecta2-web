@@ -1,0 +1,20 @@
+export '/backend/schema/util/schema_util.dart';
+
+export 'acudiente_struct.dart';
+export 'alerta_struct.dart';
+export 'alerta_especial_struct.dart';
+export 'atributos_struct.dart';
+export 'calendar_day_struct.dart';
+export 'contenido_details_struct.dart';
+export 'opciones_tamizaje_struct.dart';
+export 'preguntas_encuesta_struct.dart';
+export 'preguntas_tamizajes_struct.dart';
+export 'profesionales_struct.dart';
+export 'respuesta_encuesta_struct.dart';
+export 'respuesta_test_struct.dart';
+export 'respusta_tamizaje_struct.dart';
+export 'valor_condicionante_struct.dart';
+export 'calender_emociones_struct.dart';
+export 'detalle_usuario_struct.dart';
+export 'registro_usuario_temp_struct.dart';
+export 'select_struct.dart';
