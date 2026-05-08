@@ -64,6 +64,18 @@ class _DetalleTamizajeViewState extends State<DetalleTamizajeView> {
 
   UsersRecord? get _adolescente => widget.adolescente ?? _adolescenteCargado;
 
+  int? _edadFromBirth(DateTime? birth) {
+    if (birth == null) return null;
+    final now = DateTime.now();
+    int age = now.year - birth.year;
+    if (now.month < birth.month ||
+        (now.month == birth.month && now.day < birth.day)) {
+      age--;
+    }
+    if (age < 0 || age > 120) return null;
+    return age;
+  }
+
   Future<void> _guardarNotas() async {
     setState(() => _guardandoNotas = true);
     try {
@@ -133,13 +145,8 @@ class _DetalleTamizajeViewState extends State<DetalleTamizajeView> {
   // umbrales — en ese caso classifyNivel usará defaults clínicos.
   UmbralesConfig? _umbralesFrom(EncuestasRecord e) {
     final cat = e.categoria;
-    if ((cat == 'Escala autoestima' || cat == 'CDI') &&
-        e.bajo.hasMax() &&
-        e.moderado.hasMax()) {
-      return UmbralesConfig(
-        bajoMax: e.bajo.max,
-        moderadoMax: e.moderado.max,
-      );
+    if (cat == 'Escala autoestima' || cat == 'CDI') {
+      return umbralesTripleteDesdeEncuesta(e);
     }
     if (cat == 'Depresión Beck' && e.alertas.length >= 4) {
       return UmbralesConfig(
@@ -232,6 +239,8 @@ class _DetalleTamizajeViewState extends State<DetalleTamizajeView> {
     final respuesta = widget.respuesta;
     final adolescente = _adolescente;
     final nombre = adolescente?.displayName ?? 'Cargando...';
+    final genero = (adolescente?.genero ?? '').trim();
+    final edad = _edadFromBirth(adolescente?.fechaNacimiento);
     final esCdi = _encuesta?.categoria == 'CDI';
     final cdiSub = esCdi ? _calcularSubescalasCdi() : null;
 
@@ -266,6 +275,8 @@ class _DetalleTamizajeViewState extends State<DetalleTamizajeView> {
                       _InfoCard(
                         nombre: nombre,
                         fecha: formatDate(respuesta.fecha),
+                        genero: genero.isEmpty ? '—' : genero,
+                        edad: edad == null ? '—' : '$edad',
                         puntaje: respuesta.puntajeTotal,
                         invalidado: respuesta.invalidado,
                         theme: theme,
@@ -509,6 +520,8 @@ class _InfoCard extends StatelessWidget {
   const _InfoCard({
     required this.nombre,
     required this.fecha,
+    required this.genero,
+    required this.edad,
     required this.puntaje,
     required this.invalidado,
     required this.theme,
@@ -516,6 +529,8 @@ class _InfoCard extends StatelessWidget {
 
   final String nombre;
   final String fecha;
+  final String genero;
+  final String edad;
   final int puntaje;
   final bool invalidado;
   final FlutterFlowTheme theme;
@@ -583,6 +598,22 @@ class _InfoCard extends StatelessWidget {
                           fontSize: 13, color: theme.secondaryText),
                     ),
                   ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Género: $genero',
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    color: theme.secondaryText,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Edad: $edad',
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    color: theme.secondaryText,
+                  ),
                 ),
               ],
             ),

@@ -160,28 +160,35 @@ String? categoriaForTipo(TamizajeTipo tipo) {
   }
 }
 
-/// Loads the list of published encuestas matching [tipo] for the drill-down
-/// selector. Returns an empty list for [TamizajeTipo.todas].
+/// Loads published encuestas for the selector. When [tipo] is [TamizajeTipo.todas],
+/// returns every tamizaje; otherwise filters by family (Autoestima, CDI, etc.).
 Future<List<({String titulo, DocumentReference ref})>> loadEncuestasByTipo(
   TamizajeTipo tipo,
 ) async {
-  if (tipo == TamizajeTipo.todas) return [];
   try {
     final snap = await FirebaseFirestore.instance
         .collection('Encuestas')
         .where('tipo', isEqualTo: 'Tamizajes')
         .get()
         .timeout(const Duration(seconds: 10));
-    return snap.docs
-        .where((d) {
-          final titulo = (d.data()['titulo'] ?? '').toString();
-          return _matchesTipo(tipo, titulo);
-        })
+    final rawDocs = snap.docs;
+    final filteredDocs = tipo == TamizajeTipo.todas
+        ? rawDocs
+        : rawDocs.where((d) {
+            final titulo = (d.data()['titulo'] ?? '').toString();
+            return _matchesTipo(tipo, titulo);
+          });
+    final list = filteredDocs
         .map((d) => (
               titulo: (d.data()['titulo'] ?? '').toString(),
               ref: d.reference,
             ))
+        .where((e) => e.titulo.isNotEmpty)
         .toList();
+    list.sort(
+      (a, b) => a.titulo.toLowerCase().compareTo(b.titulo.toLowerCase()),
+    );
+    return list;
   } catch (_) {
     return [];
   }
@@ -193,9 +200,11 @@ Future<StatsAggregates> loadStats(
   String? colegio,
   DateTimeRange? rango,
   DocumentReference? encuestaRef,
+  String? nivelAlerta,
 }) async {
   final responses = <ClassifiedResponse>[];
   final userCache = <String, Map<String, dynamic>>{};
+  final nivelesEje = tipo.niveles;
 
   try {
     final snap = await FirebaseFirestore.instance
@@ -250,9 +259,20 @@ Future<StatsAggregates> loadStats(
       }
       if (items.isEmpty) continue;
 
+      final nivel = classifyNivel(
+        titulo,
+        items,
+        puntajeTotal: data['puntajeTotal'] as num?,
+      );
+      final bucket = mapNivelToBucket(nivel, nivelesEje);
+      if (nivelAlerta != null &&
+          nivelAlerta.isNotEmpty &&
+          bucket != nivelAlerta) {
+        continue;
+      }
+
       responses.add(ClassifiedResponse(
-        nivel: classifyNivel(titulo, items,
-            puntajeTotal: data['puntajeTotal'] as num?),
+        nivel: nivel,
         genero: normalizeGenero(userData['genero']?.toString()),
         edad: _edadFromUser(userData),
         tipo: _resolveTipoForTitulo(titulo),
@@ -364,11 +384,17 @@ class StatsColors {
         n.contains('leve')) {
       return amarillo;
     }
-    if (n.contains('baja') ||
-        n.contains('mínima') ||
+    // Rosemberg (autoestima): "Elevada" es resultado favorable; "Baja" es
+    // baja autoestima (alerta). Deben colorearse distinto — no agrupar con `baja`.
+    if (n.contains('elevada')) {
+      return verde;
+    }
+    if (n.contains('baja')) {
+      return rojo;
+    }
+    if (n.contains('mínima') ||
         n.contains('minima') ||
-        n.contains('sin') ||
-        n.contains('elevada')) {
+        n.contains('sin')) {
       return verde;
     }
     return gris;

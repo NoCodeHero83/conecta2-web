@@ -135,8 +135,10 @@ String classifyNivel(
 }) {
   final key = tipoKeyFromTitulo(titulo);
   int total = 0;
-  if (puntajeTotal is num && puntajeTotal > 0) {
-    total = puntajeTotal.toInt();
+  // Incluye puntaje 0 (válido en CDI/Beck); antes `> 0` forzaba total=0 y
+  // devolvía siempre el tramo más bajo aunque el doc tuviera umbrales.
+  if (puntajeTotal != null) {
+    total = puntajeTotal!.round();
   } else {
     for (final m in items) {
       total += numericValue(m);

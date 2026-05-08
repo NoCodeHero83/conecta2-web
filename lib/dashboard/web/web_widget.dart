@@ -73,11 +73,20 @@ class _WebWidgetState extends State<WebWidget> {
 
   /// Keep the legacy `_model.menuPcModel.select` in sync with the
   /// current route so `MenuselectWidget` highlights the active item.
+  ///
+  /// Also keeps the Estadísticas submenu open: each `/web/...` child route
+  /// builds a new [WebWidget], so [MenuPcModel] is recreated and
+  /// `subMenu` would default to false without this.
   void _syncMenuSelect() {
+    final menu = _model.menuPcModel;
     final legacy = _activeSection.legacySelect;
-    if (_model.menuPcModel.select != legacy) {
-      _model.menuPcModel.select = legacy;
+    if (menu.select != legacy) {
+      menu.select = legacy;
     }
+    final enRamaEstadisticas = _activeSection == WebSection.estadisticas ||
+        _activeSection == WebSection.mapa ||
+        _activeSection == WebSection.excel;
+    menu.subMenu = enRamaEstadisticas;
   }
 
   @override

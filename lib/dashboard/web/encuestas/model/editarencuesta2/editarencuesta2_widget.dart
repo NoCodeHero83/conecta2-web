@@ -70,9 +70,28 @@ class _Editarencuesta2WidgetState extends State<Editarencuesta2Widget> {
         _model.categoriaValueController ??=
             FormFieldController<String>(_model.categoriaValue);
       });
-      if (widget.docencuestas2!.alertas.length > 2) {
+      final doc = widget.docencuestas2!;
+      final cat = doc.categoria;
+      if (cat == 'CDI' || cat == 'Escala autoestima') {
+        if (doc.alertas.length >= 3) {
+          FFAppState().listaAlertasEnvio =
+              doc.alertas.toList().cast<AlertaStruct>();
+        } else if (doc.bajo.hasMax() &&
+            doc.moderado.hasMax() &&
+            doc.alto.hasMax()) {
+          FFAppState().listaAlertasEnvio = [
+            doc.bajo,
+            doc.moderado,
+            doc.alto,
+          ];
+        } else {
+          FFAppState().listaAlertasEnvio =
+              alertasTripletePorDefecto(cat);
+        }
+        safeSetState(() {});
+      } else if (doc.alertas.length > 2) {
         FFAppState().listaAlertasEnvio =
-            widget.docencuestas2!.alertas.toList().cast<AlertaStruct>();
+            doc.alertas.toList().cast<AlertaStruct>();
         safeSetState(() {});
       } else {
         FFAppState().listaAlertasEnvio =
@@ -116,6 +135,73 @@ class _Editarencuesta2WidgetState extends State<Editarencuesta2Widget> {
     _model.maybeDispose();
 
     super.dispose();
+  }
+
+  /// Evita que un `.update()` del editor modular deje `bajo`/`moderado`/`alto`
+  /// sin escribir (Firestore conservaba valores viejos; en creación quedaban vacíos).
+  Map<String, dynamic> _payloadEncuestaRecord({
+    required bool publicado,
+    String? titulo,
+    String? descripcion,
+  }) {
+    final cat = _model.categoriaValue ?? widget.docencuestas2?.categoria;
+    AlertaStruct? bajo;
+    AlertaStruct? moderado;
+    AlertaStruct? alto;
+    if ((cat == 'Escala autoestima' || cat == 'CDI') &&
+        FFAppState().listaAlertasEnvio.length >= 3) {
+      bajo = FFAppState().listaAlertasEnvio[0];
+      moderado = FFAppState().listaAlertasEnvio[1];
+      alto = FFAppState().listaAlertasEnvio[2];
+    }
+    return createEncuestasRecordData(
+      publicado: publicado,
+      titulo: titulo,
+      descripcion: descripcion,
+      bajo: bajo,
+      moderado: moderado,
+      alto: alto,
+    );
+  }
+
+  String _normalizeTitulo(String value) =>
+      value.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
+
+  Future<bool> _tituloYaExiste(String titulo) async {
+    final encuestaRef = widget.encuestaID;
+    final normalizado = _normalizeTitulo(titulo);
+    final encuestas = await queryEncuestasRecordOnce();
+    for (final e in encuestas) {
+      if (encuestaRef != null && e.reference == encuestaRef) continue;
+      if (_normalizeTitulo(e.titulo) == normalizado) return true;
+    }
+    return false;
+  }
+
+  Future<bool> _validarTituloUnico() async {
+    final titulo = _model.textController1.text.trim();
+    if (titulo.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('El nombre del tamizaje es obligatorio.'),
+          backgroundColor: FlutterFlowTheme.of(context).error,
+        ),
+      );
+      return false;
+    }
+    final duplicado = await _tituloYaExiste(titulo);
+    if (duplicado) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text(
+            'Ya existe un tamizaje con ese nombre. Usa un nombre diferente.',
+          ),
+          backgroundColor: FlutterFlowTheme.of(context).error,
+        ),
+      );
+      return false;
+    }
+    return true;
   }
 
   @override

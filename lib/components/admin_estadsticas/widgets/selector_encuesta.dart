@@ -28,8 +28,7 @@ class SelectorEncuesta extends StatefulWidget {
 
 class _SelectorEncuestaState extends State<SelectorEncuesta> {
   List<EncuestaItem> _items = [];
-  bool _cargando = false;
-  TamizajeTipo? _tipoActual;
+  bool _cargando = true;
 
   @override
   void initState() {
@@ -44,29 +43,30 @@ class _SelectorEncuestaState extends State<SelectorEncuesta> {
   }
 
   Future<void> _cargar() async {
-    if (widget.tipo == TamizajeTipo.todas) {
-      setState(() {
-        _items = [];
-        _tipoActual = widget.tipo;
-      });
-      return;
-    }
     setState(() => _cargando = true);
     final result = await loadEncuestasByTipo(widget.tipo);
     if (!mounted) return;
     setState(() {
       _items = result;
-      _tipoActual = widget.tipo;
       _cargando = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_tipoActual == TamizajeTipo.todas || _items.isEmpty) {
-      return const SizedBox.shrink();
-    }
     final theme = FlutterFlowTheme.of(context);
+
+    if (!_cargando && _items.isEmpty) {
+      return FilterPill(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          child: Text(
+            'Sin tamizajes publicados',
+            style: filterPillLabelStyle(context),
+          ),
+        ),
+      );
+    }
 
     return FilterPill(
       child: Padding(
@@ -81,7 +81,7 @@ class _SelectorEncuestaState extends State<SelectorEncuesta> {
                 child: DropdownButton<DocumentReference?>(
                   value: widget.seleccionada,
                   hint: Text(
-                    'Tamizaje específico',
+                    'Todos los tamizajes',
                     style: filterPillLabelStyle(context),
                   ),
                   isDense: true,
@@ -89,7 +89,7 @@ class _SelectorEncuestaState extends State<SelectorEncuesta> {
                     DropdownMenuItem(
                       value: null,
                       child: Text(
-                        'Todos',
+                        'Todos los tamizajes',
                         style: GoogleFonts.inter(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,

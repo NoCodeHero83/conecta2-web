@@ -10,7 +10,10 @@
 // results views (web + mobile) and the PDF builder without pulling in
 // Material dependencies.
 
+import '/backend/schema/encuestas_record.dart';
 import '/backend/schema/structs/index.dart';
+import '/components/admin_estadsticas/helpers/classification.dart'
+    show UmbralesConfig;
 
 /// Alert level names per tamizaje category (from the requirements doc).
 /// The keys match the `categoria` field used in [EncuestasRecord].
@@ -64,6 +67,75 @@ bool usaNivelesGlobales(String? categoria) {
     default:
       return false;
   }
+}
+
+/// Umbrales para [classifyNivel] en **CDI** y **Escala autoestima** (primer y
+/// segundo tramo; el tercero es el resto).
+///
+/// Prioriza los campos anidados `bajo` y `moderado` del documento. Si no tienen
+/// `max` persistido (p. ej. primer guardado incompleto), reconstruye desde el
+/// array `alertas` buscando por etiqueta en [nivelesPorCategoria].
+/// Tres niveles por defecto (mismos valores que al crear encuesta en memoria).
+List<AlertaStruct> alertasTripletePorDefecto(String? categoria) {
+  switch (categoria) {
+    case 'Escala autoestima':
+      return [
+        AlertaStruct(nivel: 'Autoestima Baja', min: 0, max: 25),
+        AlertaStruct(nivel: 'Autoestima Media', min: 26, max: 29),
+        AlertaStruct(nivel: 'Autoestima Elevada', min: 30, max: 999),
+      ];
+    case 'CDI':
+      return [
+        AlertaStruct(nivel: 'Sin sintomatología', min: 0, max: 6),
+        AlertaStruct(nivel: 'Leve', min: 7, max: 19),
+        AlertaStruct(nivel: 'Severo', min: 20, max: 999),
+      ];
+    default:
+      return [];
+  }
+}
+
+UmbralesConfig? umbralesTripleteDesdeEncuesta(EncuestasRecord e) {
+  final cat = e.categoria;
+  if (cat != 'Escala autoestima' && cat != 'CDI') return null;
+
+  final orden = nivelesPorCategoria(cat);
+  if (orden.length < 2) return null;
+  final byNombre = <String, AlertaStruct>{};
+  for (final a in e.alertas) {
+    if (a.nivel.isNotEmpty) byNombre[a.nivel] = a;
+  }
+  final a0 = byNombre[orden[0]];
+  final a1 = byNombre[orden[1]];
+
+  // Umbrales coherentes: el segundo tramo debe terminar después del primero.
+  bool tripleteValido(int bajoMax, int moderadoMax) =>
+      bajoMax < moderadoMax;
+
+  // 1) Preferir `alertas`: AlertasConfig (editor clásico) solo persiste este
+  //    array; `bajo`/`moderado` pueden quedar desactualizados y forzar nivel
+  //    erróneo aunque el listado de alertas esté bien.
+  if (a0 != null &&
+      a1 != null &&
+      a0.hasMax() &&
+      a1.hasMax() &&
+      tripleteValido(a0.max, a1.max)) {
+    return UmbralesConfig(
+      bajoMax: a0.max,
+      moderadoMax: a1.max,
+    );
+  }
+
+  if (e.bajo.hasMax() &&
+      e.moderado.hasMax() &&
+      tripleteValido(e.bajo.max, e.moderado.max)) {
+    return UmbralesConfig(
+      bajoMax: e.bajo.max,
+      moderadoMax: e.moderado.max,
+    );
+  }
+
+  return null;
 }
 
 /// Given a [puntaje] and the saved [alertas] list from the encuesta,

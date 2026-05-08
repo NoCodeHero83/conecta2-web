@@ -5,6 +5,7 @@ import '/flutter_flow/flutter_flow_drop_down.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/form_field_controller.dart';
 
+import '../../encuesta_form_helpers.dart';
 import '../editar_encuesta_model.dart';
 
 /// Generic "(etiqueta, valor)" capture used by Tamizaje and Tamizaje autoestima.
@@ -144,12 +145,12 @@ class FormTamizajeCDI extends StatelessWidget {
                   FormFieldController<String>(null),
               options: model.tipoValue == 'Tamizaje CDI'
                   ? const ['Disforia', 'Autoestima Negativa']
-                  : const ['Cognitivo', 'Afectivo', 'Somático'],
+                  : kVariablesBeckBDI,
               onChanged: (val) {
                 model.variableCDIValue = val;
                 onUpdate();
               },
-              width: 180,
+              width: 320,
               height: 40,
               fillColor: Colors.white,
               elevation: 2.0,

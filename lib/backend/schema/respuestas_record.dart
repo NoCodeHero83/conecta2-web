@@ -88,7 +88,7 @@ class RespuestasRecord extends FirestoreRecord {
   // "motivoInvalidacion" field.
   String? _motivoInvalidacion;
   String get motivoInvalidacion => _motivoInvalidacion ?? '';
-  bool hasMotivоInvalidacion() => _motivoInvalidacion != null;
+  bool hasMotivoInvalidacion() => _motivoInvalidacion != null;
 
   // "invalidadoPor" field.
   DocumentReference? _invalidadoPor;

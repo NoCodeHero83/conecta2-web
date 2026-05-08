@@ -5,21 +5,16 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../admin_estadsticas2_model.dart';
-import 'common/app_card.dart';
 import 'common/section_title.dart';
 import 'helpers/stats_calculator.dart';
-import 'widgets/chart_alertas_edad.dart';
-import 'widgets/chart_alertas_genero.dart';
 import 'widgets/chart_distribucion_niveles.dart';
-import 'widgets/chart_grado.dart';
-import 'widgets/chart_heatmap.dart';
 import 'widgets/chart_por_edad.dart';
 import 'widgets/chart_por_genero.dart';
 import 'widgets/rango_fechas_selector.dart';
 import 'widgets/selector_colegio.dart';
 import 'widgets/selector_encuesta.dart';
+import 'widgets/selector_nivel_alerta.dart';
 import 'widgets/selector_tipo_tamizaje.dart';
-import 'widgets/stats_filters.dart';
 import 'widgets/stats_kpi_cards.dart';
 
 export '../admin_estadsticas2_model.dart';
@@ -38,8 +33,8 @@ class _AdminEstadsticas2WidgetState extends State<AdminEstadsticas2Widget> {
   TamizajeTipo _tipoSeleccionado = TamizajeTipo.todas;
   DateTimeRange? _rangoFechas;
   DocumentReference? _encuestaSeleccionada;
+  String? _nivelAlerta;
   Future<StatsAggregates>? _statsFuture;
-  bool _mostrarVistaGeneral = false;
 
   @override
   void setState(VoidCallback callback) {
@@ -61,6 +56,7 @@ class _AdminEstadsticas2WidgetState extends State<AdminEstadsticas2Widget> {
       colegio: _model.filtroColegio.isEmpty ? null : _model.filtroColegio,
       rango: _rangoFechas,
       encuestaRef: _encuestaSeleccionada,
+      nivelAlerta: _nivelAlerta,
     );
   }
 
@@ -79,12 +75,18 @@ class _AdminEstadsticas2WidgetState extends State<AdminEstadsticas2Widget> {
     super.dispose();
   }
 
-  void _onFiltersChanged() => safeSetState(_refreshStats);
-
   void _onTipoChanged(TamizajeTipo tipo) {
     setState(() {
       _tipoSeleccionado = tipo;
       _encuestaSeleccionada = null;
+      _nivelAlerta = null;
+      _refreshStats();
+    });
+  }
+
+  void _onNivelAlertaChanged(String? nivel) {
+    setState(() {
+      _nivelAlerta = nivel;
       _refreshStats();
     });
   }
@@ -92,6 +94,7 @@ class _AdminEstadsticas2WidgetState extends State<AdminEstadsticas2Widget> {
   void _onEncuestaChanged(DocumentReference? ref) {
     setState(() {
       _encuestaSeleccionada = ref;
+      _nivelAlerta = null;
       _refreshStats();
     });
   }
@@ -133,14 +136,9 @@ class _AdminEstadsticas2WidgetState extends State<AdminEstadsticas2Widget> {
                     'Distribución de alertas por género, edad y nivel de severidad.',
               ),
               const SizedBox(height: 16),
-              _buildReportesToolbar(),
+              _buildReportesToolbar(context),
               const SizedBox(height: 20),
               _buildStatsSection(),
-              const SizedBox(height: 40),
-              Divider(color: theme.alternate, height: 1),
-              const SizedBox(height: 20),
-              _buildVistaGeneralToggle(),
-              if (_mostrarVistaGeneral) _buildVistaGeneral(),
               const SizedBox(height: 40),
             ],
           ),
@@ -149,30 +147,78 @@ class _AdminEstadsticas2WidgetState extends State<AdminEstadsticas2Widget> {
     );
   }
 
-  Widget _buildReportesToolbar() {
+  Widget _filterGroup(BuildContext context, String label, Widget control) {
+    final theme = FlutterFlowTheme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(right: 12, bottom: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: theme.secondaryText,
+            ),
+          ),
+          const SizedBox(height: 6),
+          control,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReportesToolbar(BuildContext context) {
     final colegioSel =
         _model.filtroColegio.isEmpty ? null : _model.filtroColegio;
     return Wrap(
-      spacing: 12,
+      spacing: 4,
       runSpacing: 12,
-      crossAxisAlignment: WrapCrossAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.start,
       children: [
-        SelectorTipoTamizaje(
-          selected: _tipoSeleccionado,
-          onChanged: _onTipoChanged,
+        _filterGroup(
+          context,
+          'Tipo de tamizaje',
+          SelectorTipoTamizaje(
+            selected: _tipoSeleccionado,
+            onChanged: _onTipoChanged,
+          ),
         ),
-        RangoFechasSelector(
-          rango: _rangoFechas,
-          onChanged: _onRangoChanged,
+        _filterGroup(
+          context,
+          'Tamizaje',
+          SelectorEncuesta(
+            tipo: _tipoSeleccionado,
+            seleccionada: _encuestaSeleccionada,
+            onChanged: _onEncuestaChanged,
+          ),
         ),
-        SelectorColegio(
-          seleccionado: colegioSel,
-          onChanged: _onColegioChanged,
+        _filterGroup(
+          context,
+          'Colegio',
+          SelectorColegio(
+            seleccionado: colegioSel,
+            onChanged: _onColegioChanged,
+          ),
         ),
-        SelectorEncuesta(
-          tipo: _tipoSeleccionado,
-          seleccionada: _encuestaSeleccionada,
-          onChanged: _onEncuestaChanged,
+        _filterGroup(
+          context,
+          'Nivel de alerta',
+          SelectorNivelAlerta(
+            tipo: _tipoSeleccionado,
+            seleccionado: _nivelAlerta,
+            onChanged: _onNivelAlertaChanged,
+          ),
+        ),
+        _filterGroup(
+          context,
+          'Fecha',
+          RangoFechasSelector(
+            rango: _rangoFechas,
+            onChanged: _onRangoChanged,
+          ),
         ),
       ],
     );
@@ -240,64 +286,6 @@ class _AdminEstadsticas2WidgetState extends State<AdminEstadsticas2Widget> {
     );
   }
 
-  Widget _buildVistaGeneral() {
-    final items = <Widget>[
-      StatsFilters(model: _model, onChanged: _onFiltersChanged),
-      ChartAlertasEdad(model: _model),
-      ChartAlertasGenero(model: _model),
-      ChartGrado(model: _model),
-      ChartHeatmap(model: _model),
-    ];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 20),
-        const SectionTitle(
-          title: 'Vista general',
-          subtitle: 'Filtros adicionales por nivel de riesgo y sustancia.',
-        ),
-        const SizedBox(height: 16),
-        for (final item in items) ...[
-          AppCard(child: item),
-          const SizedBox(height: 16),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildVistaGeneralToggle() {
-    final theme = FlutterFlowTheme.of(context);
-    return InkWell(
-      onTap: () =>
-          setState(() => _mostrarVistaGeneral = !_mostrarVistaGeneral),
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              _mostrarVistaGeneral
-                  ? Icons.keyboard_arrow_up_rounded
-                  : Icons.keyboard_arrow_down_rounded,
-              color: theme.accent2,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              _mostrarVistaGeneral
-                  ? 'Ocultar vista general'
-                  : 'Ver vista general',
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: theme.accent2,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 class _Header extends StatelessWidget {

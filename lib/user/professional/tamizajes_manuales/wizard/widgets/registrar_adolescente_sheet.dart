@@ -22,6 +22,7 @@ class _BottomSheetRegistrarAdolescenteState
   final _identidad = TextEditingController();
   final _acudienteNombre = TextEditingController();
   final _acudienteTelefono = TextEditingController();
+  final _acudienteCorreo = TextEditingController();
 
   String? _genero;
   DateTime? _fechaNacimiento;
@@ -71,6 +72,7 @@ class _BottomSheetRegistrarAdolescenteState
         acudiente: AcudienteStruct(
           nombre: _acudienteNombre.text.trim(),
           telefono: _acudienteTelefono.text.trim(),
+          correo: _acudienteCorreo.text.trim(),
         ),
       );
       await ref.set(data);
@@ -182,6 +184,7 @@ class _BottomSheetRegistrarAdolescenteState
     _identidad.dispose();
     _acudienteNombre.dispose();
     _acudienteTelefono.dispose();
+    _acudienteCorreo.dispose();
     super.dispose();
   }
 
@@ -417,6 +420,14 @@ class _BottomSheetRegistrarAdolescenteState
                       style: GoogleFonts.inter(fontSize: 14),
                       decoration:
                           _inputDecoration('Tel\u00e9fono del acudiente'),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _acudienteCorreo,
+                      keyboardType: TextInputType.emailAddress,
+                      style: GoogleFonts.inter(fontSize: 14),
+                      decoration:
+                          _inputDecoration('Email del acudiente'),
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<String>(

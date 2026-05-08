@@ -24,6 +24,22 @@ class SidebarAccionesWidget extends StatelessWidget {
     required this.onUpdate,
   });
 
+  String _normalizeTitulo(String value) =>
+      value.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
+
+  Future<bool> _tituloYaExiste({
+    required String titulo,
+    DocumentReference? excludeRef,
+  }) async {
+    final normalizado = _normalizeTitulo(titulo);
+    final encuestas = await queryEncuestasRecordOnce();
+    for (final e in encuestas) {
+      if (excludeRef != null && e.reference == excludeRef) continue;
+      if (_normalizeTitulo(e.titulo) == normalizado) return true;
+    }
+    return false;
+  }
+
   // Crea o actualiza el doc de Firestore con el estado completo del _model.
   // Devuelve la ref persistida, o null si la validación falla. La primera
   // invocación hace .set() y guarda la ref en model.encuestaPersistedRef;
@@ -45,6 +61,21 @@ class SidebarAccionesWidget extends StatelessWidget {
       );
       return null;
     }
+    final existing = _model.encuestaPersistedRef;
+    final duplicado =
+        await _tituloYaExiste(titulo: titulo, excludeRef: existing);
+    if (duplicado) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text(
+            'Ya existe un tamizaje con ese nombre. Usa un nombre diferente.',
+          ),
+          backgroundColor: FlutterFlowTheme.of(context).error,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+      return null;
+    }
 
     final preguntasFS = _model.preguntasBuffer
         .map((p) => getPreguntasEncuestaFirestoreData(p, true))
@@ -57,6 +88,11 @@ class SidebarAccionesWidget extends StatelessWidget {
     // categoría. Sustancias usa FFAppState().listaAlertasEnvio; Autoestima y
     // CDI usan los 3 campos bajo/moderado/alto; Beck usa el array `alertas`.
     final cat = _model.categoriaValue;
+    if (cat == 'Escala autoestima' || cat == 'CDI') {
+      if (_model.nivelesAlerta.length < 3) {
+        _model.seedNivelesAlerta(cat);
+      }
+    }
     List<Map<String, dynamic>> alertasFS;
     AlertaStruct? bajo;
     AlertaStruct? moderado;
@@ -103,7 +139,6 @@ class SidebarAccionesWidget extends StatelessWidget {
       }),
     };
 
-    final existing = _model.encuestaPersistedRef;
     if (existing == null) {
       final ref = EncuestasRecord.collection.doc();
       await ref.set({
