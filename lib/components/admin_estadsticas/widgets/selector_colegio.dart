@@ -21,7 +21,8 @@ class SelectorColegio extends StatelessWidget {
       stream: queryColegiosRecord(),
       builder: (context, snapshot) {
         final items = <DropdownMenuItem<String?>>[
-          const DropdownMenuItem(value: null, child: Text('Todas las sedes')),
+          const DropdownMenuItem(
+              value: null, child: Text('Todos los colegios')),
           ...?snapshot.data?.map(
             (c) => DropdownMenuItem<String?>(
               value: c.nombre,
@@ -41,7 +42,7 @@ class SelectorColegio extends StatelessWidget {
                 DropdownButtonHideUnderline(
                   child: DropdownButton<String?>(
                     value: seleccionado,
-                    hint: Text('Todas las sedes',
+                    hint: Text('Todos los colegios',
                         style: filterPillLabelStyle(context)),
                     icon: Icon(Icons.keyboard_arrow_down_rounded,
                         color: theme.secondaryText),

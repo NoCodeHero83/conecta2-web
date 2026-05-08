@@ -153,6 +153,7 @@ class _DialogoRegistrarAdolescenteState
   final _identidad = TextEditingController();
   final _acudienteNombre = TextEditingController();
   final _acudienteTelefono = TextEditingController();
+  final _acudienteCorreo = TextEditingController();
   String? _genero;
   DateTime? _fechaNacimiento;
   String? _colegioSeleccionado;
@@ -167,6 +168,18 @@ class _DialogoRegistrarAdolescenteState
   void initState() {
     super.initState();
     _cargarCatalogos();
+  }
+
+  @override
+  void dispose() {
+    _nombre.dispose();
+    _email.dispose();
+    _telefono.dispose();
+    _identidad.dispose();
+    _acudienteNombre.dispose();
+    _acudienteTelefono.dispose();
+    _acudienteCorreo.dispose();
+    super.dispose();
   }
 
   Future<void> _cargarCatalogos() async {
@@ -357,6 +370,7 @@ class _DialogoRegistrarAdolescenteState
         acudiente: AcudienteStruct(
           nombre: _acudienteNombre.text.trim(),
           telefono: _acudienteTelefono.text.trim(),
+          correo: _acudienteCorreo.text.trim(),
         ),
         profesionales: ProfesionalesStruct(
           ref: currentUserReference,
@@ -563,6 +577,13 @@ class _DialogoRegistrarAdolescenteState
                 decoration:
                     _inputDecoration('Telefono del acudiente'),
                 keyboardType: TextInputType.phone,
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _acudienteCorreo,
+                decoration:
+                    _inputDecoration('Email del acudiente'),
+                keyboardType: TextInputType.emailAddress,
               ),
             ],
           ),

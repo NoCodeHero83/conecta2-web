@@ -345,70 +345,76 @@ class _MenuPcWidgetState extends State<MenuPcWidget> {
                 Column(
                   mainAxisSize: MainAxisSize.max,
                   children: [
-                    InkWell(
-                      splashColor: Colors.transparent,
-                      focusColor: Colors.transparent,
-                      hoverColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      onTap: () async {
-                        _model.subMenu = _model.subMenu ? false : true;
-                        safeSetState(() {});
-                      },
-                      child: Container(
-                        width: MediaQuery.sizeOf(context).width * 1.0,
-                        height: 40.0,
-                        decoration: BoxDecoration(
-                          color: FlutterFlowTheme.of(context).menuWeb,
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        child: Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
-                              8.0, 0.0, 8.0, 0.0),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                              Icon(
-                                Icons.query_stats_sharp,
-                                color: FlutterFlowTheme.of(context).accent1,
-                                size: 24.0,
+                    Builder(
+                      builder: (context) {
+                        final enEstadisticas =
+                            _model.select == WebSection.estadisticas.legacySelect ||
+                                _model.select == WebSection.mapa.legacySelect ||
+                                _model.select == WebSection.excel.legacySelect;
+                        final tema = FlutterFlowTheme.of(context);
+                        return InkWell(
+                          splashColor: Colors.transparent,
+                          focusColor: Colors.transparent,
+                          hoverColor: Colors.transparent,
+                          highlightColor: Colors.transparent,
+                          onTap: () async {
+                            _model.subMenu = _model.subMenu ? false : true;
+                            safeSetState(() {});
+                          },
+                          child: Container(
+                            width: MediaQuery.sizeOf(context).width * 1.0,
+                            height: 44.0,
+                            decoration: BoxDecoration(
+                              color: valueOrDefault<Color>(
+                                enEstadisticas
+                                    ? tema.alternate
+                                    : tema.menuWeb,
+                                tema.menuWeb,
                               ),
-                              Expanded(
-                                child: Text(
-                                  'Estadisticas',
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            child: Padding(
+                              padding: EdgeInsetsDirectional.fromSTEB(
+                                  8.0, 0.0, 8.0, 0.0),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.max,
+                                children: [
+                                  Icon(
+                                    Icons.query_stats_sharp,
+                                    color: tema.accent1,
+                                    size: 24.0,
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      'Estadisticas',
+                                      style: tema.bodyMedium.override(
                                         font: GoogleFonts.inter(
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontStyle,
+                                          fontWeight: tema.bodyMedium.fontWeight,
+                                          fontStyle: tema.bodyMedium.fontStyle,
                                         ),
-                                        color: FlutterFlowTheme.of(context)
-                                            .accent1,
+                                        color: valueOrDefault<Color>(
+                                          enEstadisticas
+                                              ? const Color(0xFF265294)
+                                              : tema.accent1,
+                                          tema.accent1,
+                                        ),
                                         letterSpacing: 0.0,
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
+                                        fontWeight: tema.bodyMedium.fontWeight,
+                                        fontStyle: tema.bodyMedium.fontStyle,
                                       ),
-                                ),
+                                    ),
+                                  ),
+                                  Icon(
+                                    Icons.arrow_drop_down,
+                                    color: tema.accent1,
+                                    size: 24.0,
+                                  ),
+                                ].divide(SizedBox(width: 8.0)),
                               ),
-                              Icon(
-                                Icons.arrow_drop_down,
-                                color: FlutterFlowTheme.of(context).accent1,
-                                size: 24.0,
-                              ),
-                            ].divide(SizedBox(width: 8.0)),
+                            ),
                           ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
                     if (_model.subMenu)
                       Container(
@@ -437,6 +443,7 @@ class _MenuPcWidgetState extends State<MenuPcWidget> {
                                     size: 18.0,
                                   ),
                                   text: 'Graficos',
+                                  activeKey: WebSection.estadisticas.legacySelect,
                                   select: _model.select,
                                 ),
                               ),
@@ -460,6 +467,7 @@ class _MenuPcWidgetState extends State<MenuPcWidget> {
                                     size: 18.0,
                                   ),
                                   text: 'Mapa',
+                                  activeKey: WebSection.mapa.legacySelect,
                                   select: _model.select,
                                 ),
                               ),
@@ -483,6 +491,7 @@ class _MenuPcWidgetState extends State<MenuPcWidget> {
                                     size: 18.0,
                                   ),
                                   text: 'Tabulación general',
+                                  activeKey: WebSection.excel.legacySelect,
                                   select: _model.select,
                                 ),
                               ),

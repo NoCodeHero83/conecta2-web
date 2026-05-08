@@ -1,5 +1,6 @@
 import '/backend/backend.dart';
 import '/components/admin_estadsticas/helpers/classification.dart';
+import '/dashboard/web/encuestas/editar/widgets/tamizajes_niveles.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/tamizajes/shared/tamizaje_service.dart';
 import '/tamizajes/shared/tamizaje_utils.dart';
@@ -203,6 +204,18 @@ class _RespuestaCard extends StatefulWidget {
 class _RespuestaCardState extends State<_RespuestaCard> {
   bool _hover = false;
 
+  int? _edadFromBirth(DateTime? birth) {
+    if (birth == null) return null;
+    final now = DateTime.now();
+    int age = now.year - birth.year;
+    if (now.month < birth.month ||
+        (now.month == birth.month && now.day < birth.day)) {
+      age--;
+    }
+    if (age < 0 || age > 120) return null;
+    return age;
+  }
+
   // Deriva el nivel clínico a partir de la categoría configurada en el
   // tamizaje y del puntaje total. Devuelve '' si no hay encuesta aún.
   String _nivelDe(EncuestasRecord? encuesta, RespuestasRecord r) {
@@ -238,13 +251,8 @@ class _RespuestaCardState extends State<_RespuestaCard> {
   // encuesta no tiene umbrales o la categoría no es configurable.
   UmbralesConfig? _umbralesFrom(EncuestasRecord e) {
     final cat = e.categoria;
-    if ((cat == 'Escala autoestima' || cat == 'CDI') &&
-        e.bajo.hasMax() &&
-        e.moderado.hasMax()) {
-      return UmbralesConfig(
-        bajoMax: e.bajo.max,
-        moderadoMax: e.moderado.max,
-      );
+    if (cat == 'Escala autoestima' || cat == 'CDI') {
+      return umbralesTripleteDesdeEncuesta(e);
     }
     if (cat == 'Depresión Beck' && e.alertas.length >= 4) {
       return UmbralesConfig(
@@ -316,6 +324,8 @@ class _RespuestaCardState extends State<_RespuestaCard> {
                         builder: (context, snap) {
                           final name =
                               snap.data?.displayName ?? 'Cargando...';
+                          final genero = (snap.data?.genero ?? '').trim();
+                          final edad = _edadFromBirth(snap.data?.fechaNacimiento);
                           final inicial = name.isNotEmpty
                               ? name[0].toUpperCase()
                               : '?';
@@ -359,6 +369,15 @@ class _RespuestaCardState extends State<_RespuestaCard> {
                                         fontSize: 12,
                                         color: theme.secondaryText,
                                       ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      'Género: ${genero.isEmpty ? '—' : genero}  ·  Edad: ${edad == null ? '—' : '$edad'}',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 12,
+                                        color: theme.secondaryText,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ],
                                 ),

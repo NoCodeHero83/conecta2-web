@@ -15,6 +15,32 @@ const Map<String, List<String>> kTiposPorCategoria = {
   'CRQ / SRQ': ['Tamizaje CRQ / SRQ', 'Descriptiva'],
 };
 
+/// Variables para preguntas tipo *Tamizajes Depresion Beck*: los 21 ítems del
+/// inventario BDI-II en orden habitual. El valor se guarda en `variable`.
+const List<String> kVariablesBeckBDI = [
+  'Tristeza',
+  'Pesimismo',
+  'Fracaso',
+  'Pérdida de placer',
+  'Sentimientos de culpa',
+  'Sentimientos de castigo',
+  'Disconformidad con uno mismo',
+  'Autocrítica',
+  'Pensamientos o deseos suicidas',
+  'Llanto',
+  'Agitación',
+  'Pérdida de interés',
+  'Indecisión',
+  'Desvalorización',
+  'Pérdida de energía',
+  'Cambios en los hábitos de sueño',
+  'Irritabilidad',
+  'Cambios en el apetito',
+  'Dificultad de concentración',
+  'Cansancio o fatiga',
+  'Pérdida de interés en el sexo',
+];
+
 /// Retorna los tipos de pregunta permitidos para una categoria.
 /// Si categoria es null, vacia o 'Todas', retorna [todosLosTipos].
 List<String> tiposPermitidos(String? categoria, List<String> todosLosTipos) {
@@ -393,12 +419,14 @@ class EncuestaFormHelpers {
                  return FlutterFlowDropDown<String>(
                   textStyle: FlutterFlowTheme.of(context).bodyMedium,
                   controller: model.variableCDIValueController ??= FormFieldController<String>(null),
-                  options: model.tipoValue == 'Tamizaje CDI' ? ['Disforia', 'Autoestima Negativa'] : ['Cognitivo', 'Afectivo', 'Somático'],
+                  options: model.tipoValue == 'Tamizaje CDI'
+                      ? const ['Disforia', 'Autoestima Negativa']
+                      : kVariablesBeckBDI,
                   onChanged: (val) {
                     model.variableCDIValue = val;
                     onUpdate();
                   },
-                  width: 180,
+                  width: 320,
                   height: 40,
                   fillColor: Colors.white,
                   elevation: 2.0,

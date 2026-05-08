@@ -519,6 +519,22 @@ class _EditarEncuestaWidgetState extends State<EditarEncuestaWidget> {
     );
   }
 
+  String _normalizeTitulo(String value) =>
+      value.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
+
+  Future<bool> _tituloYaExiste({
+    required String titulo,
+    required DocumentReference encuestaRef,
+  }) async {
+    final normalizado = _normalizeTitulo(titulo);
+    final encuestas = await queryEncuestasRecordOnce();
+    for (final e in encuestas) {
+      if (e.reference == encuestaRef) continue;
+      if (_normalizeTitulo(e.titulo) == normalizado) return true;
+    }
+    return false;
+  }
+
   // ── Lista de preguntas ya guardadas ───────────────────────────────────
 
   Widget _buildListaPreguntas(EncuestasRecord encuesta) {
@@ -672,8 +688,22 @@ class _EditarEncuestaWidgetState extends State<EditarEncuestaWidget> {
     required bool publicado,
     required bool vistaPrevia,
   }) async {
+    final titulo = _model.tituloController.text.trim();
+    if (titulo.isEmpty) {
+      _showError(context, 'El nombre del tamizaje es obligatorio.');
+      return;
+    }
+    final duplicado =
+        await _tituloYaExiste(titulo: titulo, encuestaRef: encuesta.reference);
+    if (duplicado) {
+      _showError(
+        context,
+        'Ya existe un tamizaje con ese nombre. Usa un nombre diferente.',
+      );
+      return;
+    }
     await encuesta.reference.update(createEncuestasRecordData(
-      titulo: _model.tituloController.text,
+      titulo: titulo,
       descripcion: _model.descripcionController.text,
       categoria: _model.categoriaValue,
       publicado: publicado,

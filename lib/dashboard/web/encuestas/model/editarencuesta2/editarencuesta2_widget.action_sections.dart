@@ -586,10 +586,15 @@ extension _Editarencuesta2WidgetBuildSections2 on _Editarencuesta2WidgetState {
                                                                 FFButtonWidget(
                                                               onPressed:
                                                                   () async {
+                                                                final okTitulo =
+                                                                    await _validarTituloUnico();
+                                                                if (!okTitulo) {
+                                                                  return;
+                                                                }
                                                                 await widget
                                                                     .encuestaID!
                                                                     .update({
-                                                                  ...createEncuestasRecordData(
+                                                                  ..._payloadEncuestaRecord(
                                                                     publicado:
                                                                         true,
                                                                     titulo: _model
@@ -699,10 +704,15 @@ extension _Editarencuesta2WidgetBuildSections2 on _Editarencuesta2WidgetState {
                                                                 FFButtonWidget(
                                                               onPressed:
                                                                   () async {
+                                                                final okTitulo =
+                                                                    await _validarTituloUnico();
+                                                                if (!okTitulo) {
+                                                                  return;
+                                                                }
                                                                 await widget
                                                                     .encuestaID!
                                                                     .update({
-                                                                  ...createEncuestasRecordData(
+                                                                  ..._payloadEncuestaRecord(
                                                                     publicado:
                                                                         true,
                                                                     titulo: _model
@@ -810,6 +820,11 @@ extension _Editarencuesta2WidgetBuildSections2 on _Editarencuesta2WidgetState {
                                                                   FFButtonWidget(
                                                                 onPressed:
                                                                     () async {
+                                                                  final okTitulo =
+                                                                      await _validarTituloUnico();
+                                                                  if (!okTitulo) {
+                                                                    return;
+                                                                  }
                                                                   FFAppState()
                                                                       .selectUser = '';
                                                                   safeSetState(
@@ -818,7 +833,7 @@ extension _Editarencuesta2WidgetBuildSections2 on _Editarencuesta2WidgetState {
                                                                   await widget
                                                                       .encuestaID!
                                                                       .update({
-                                                                    ...createEncuestasRecordData(
+                                                                    ..._payloadEncuestaRecord(
                                                                       publicado:
                                                                           true,
                                                                       titulo: _model
